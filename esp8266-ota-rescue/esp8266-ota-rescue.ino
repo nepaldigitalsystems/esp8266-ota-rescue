@@ -1,14 +1,11 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 
 extern "C" {
 #include <user_interface.h>
 }
 
-
-MDNSResponder mdns;
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -32,33 +29,22 @@ void wificonfig_wifiOff() {
 
 
 void setup(void){
-  pinMode(LED_BUILTIN, OUTPUT);
   wificonfig_wifiOff();
   Serial.begin(115200);
   Serial.println();
   Serial.println("Booting Sketch...");
   wificonfig_wifiOn();
-  boolean result = WiFi.softAP("EspAccessPoint", ""); // "" => no password
+  boolean result = WiFi.softAP("esp8266", ""); // "" => no password
   Serial.println(result == true ? "AP setup OK" : "AP setup failed");
 
   IPAddress myIP = WiFi.softAPIP();  
   Serial.print("Access Point IP address: ");Serial.println(myIP);
-  if (mdns.begin("espotaserver", myIP)) {
-    Serial.println("MDNS responder started");
-    }
   httpUpdater.setup(&httpServer);
   httpServer.begin();
-  Serial.println("HTTPUpdateServer ready! Open http://espotaserver.local/update");
-  Serial.printf("or http://");Serial.print(myIP);Serial.println("/update in your browser");  
+  Serial.print("HTTPUpdateServer ready! Open http://");Serial.print(myIP);Serial.println("/update in your browser");  
   }
 
 
 void loop(void){
   httpServer.handleClient();
-#if 0
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(100);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(200);
-#endif
   }
